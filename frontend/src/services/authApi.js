@@ -6,6 +6,11 @@ export const authApi = {
     return response.data;
   },
 
+  register: async (studentData) => {
+    const response = await api.post('/auth/register', studentData);
+    return response.data;
+  },
+
   getMe: async () => {
     const response = await api.get('/auth/me');
     return response.data;

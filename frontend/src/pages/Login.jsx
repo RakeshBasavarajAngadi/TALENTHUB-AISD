@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { GraduationCap, ShieldCheck, User, ArrowRight, KeyRound, Mail, AlertCircle } from 'lucide-react';
 
 export default function Login() {
@@ -152,6 +152,17 @@ export default function Login() {
               )}
             </button>
           </form>
+
+          {role === 'STUDENT' && (
+            <div className="mt-4 text-center">
+              <p className="text-xs text-slate-400">
+                New candidate?{' '}
+                <Link to="/register" className="text-sky-400 hover:text-sky-300 font-semibold underline underline-offset-2 transition">
+                  Register as Student
+                </Link>
+              </p>
+            </div>
+          )}
 
           {/* Quick Demo Logins Helper */}
           <div className="mt-6 pt-5 border-t border-slate-800/80">

@@ -41,6 +41,20 @@ export const AuthProvider = ({ children }) => {
     return userData;
   };
 
+  const register = async (studentData) => {
+    const response = await authApi.register(studentData);
+    const userData = {
+      user_id: response.user_id,
+      name: response.name,
+      email: response.email,
+      role: response.role
+    };
+    localStorage.setItem('talenthub_token', response.access_token);
+    localStorage.setItem('talenthub_user', JSON.stringify(userData));
+    setUser(userData);
+    return userData;
+  };
+
   const logout = () => {
     localStorage.removeItem('talenthub_token');
     localStorage.removeItem('talenthub_user');
@@ -48,7 +62,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, register, logout, loading, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

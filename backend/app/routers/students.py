@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.student import Student
-from app.schemas.student import StudentResponse, StudentUpdate
-from app.dependencies.auth import get_current_student, get_current_admin
+from app.schemas.student import StudentResponse, StudentUpdate, StudentCreate
+from app.dependencies.auth import get_current_student, get_current_admin, get_password_hash
 
 router = APIRouter(prefix="/api/students", tags=["Students"])
 
@@ -41,3 +41,32 @@ def list_students(
     db: Session = Depends(get_db)
 ):
     return db.query(Student).all()
+
+@router.post("", response_model=StudentResponse, status_code=status.HTTP_201_CREATED)
+def create_student(
+    data: StudentCreate,
+    db: Session = Depends(get_db)
+):
+    email_clean = data.email.strip().lower()
+    usn_clean = data.usn.strip().upper()
+
+    if db.query(Student).filter(Student.email.ilike(email_clean)).first():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Student email already exists.")
+    if db.query(Student).filter(Student.usn.ilike(usn_clean)).first():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Student USN already exists.")
+
+    student = Student(
+        usn=usn_clean,
+        name=data.name.strip(),
+        email=email_clean,
+        branch=data.branch.strip().upper(),
+        cgpa=data.cgpa,
+        active_backlogs=data.active_backlogs or 0,
+        cleared_backlogs=data.cleared_backlogs or 0,
+        has_accepted_offer=False,
+        hashed_password=get_password_hash(data.password or "password123")
+    )
+    db.add(student)
+    db.commit()
+    db.refresh(student)
+    return student
